@@ -111,6 +111,21 @@ app.post('/:id', function (request, response) {
   }
 });
 
+app.delete('/:id', function(request, response) {
+  var idMatcher = /^[a-f\d]{24}$/i;
+  if (request.params.id.match(idMatcher)){
+    Formulaire.remove({_id: request.params.id}, function(err){
+      if (err) {
+        return console.log(err);
+      }
+      return response.send("Document deleted");
+    });
+  }
+  else {
+    return response.status(400).send('Incorrect ID');
+  }
+});
+
 mongoose.connect(mongoUrl);
 var mongoDb = mongoose.connection;
 mongoDb.on('error', console.error.bind(console, 'Can\'t connect to MongoDB.'));
