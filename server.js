@@ -43,6 +43,13 @@ function initMongo() {
   async.map(dataSample, createEntry);
 }
 
+app.use(function(request, response, next) {
+  response.header("Access-Control-Allow-Origin", "*");
+  response.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  response.header('Access-Control-Allow-Methods', 'POST,GET,OPTIONS,PUT,DELETE');
+  next();
+});
+
 app.get('/', function (request, response) {
   Formulaire.find(function(err, result){
     if (err) {
