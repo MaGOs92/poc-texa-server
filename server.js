@@ -19,30 +19,6 @@ var mongoUrl = process.env.MONGOLAB_URI ||
                process.env.MONGODB_URI ||
                'mongodb://localhost/poc-texa';
 
-function createEntry(formulaire, callback){
-  var newFormulaire = new Formulaire({
-    firstName: formulaire.firstName,
-    lastName: formulaire.lastName,
-    chiffrages: formulaire.chiffrages
-  });
-  newFormulaire.save(function(err, savedFormulaire){
-    if (err) {
-      console.log(err);
-    }
-    if (typeof callback !== 'undefined'){
-      callback(err, savedFormulaire);
-    }
-  });
-}
-
-function initMongo() {
-  console.log('Drop database ' + mongoUrl);
-  mongoose.connection.db.dropDatabase();
-
-  console.log('Inserting data for test');
-  async.map(dataSample, createEntry);
-}
-
 app.use(function(request, response, next) {
   response.header("Access-Control-Allow-Origin", "*");
   response.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
@@ -60,23 +36,25 @@ app.get('/', function (request, response) {
 });
 
 app.post('/', function(request, response) {
-  var formulaire = {
+  var newFormulaire = new Formulaire({
+    id: request.body.id,
     firstName: request.body.firstName,
     lastName: request.body.lastName,
     chiffrages: request.body.chiffrages
-  };
-  createEntry(formulaire, function(err, newRecord){
+  });
+  newFormulaire.save(function(err, savedFormulaire){
     if (err) {
+      response.status(500).send();
       return console.log(err);
     }
-    response.send(newRecord);
+    response.send(savedFormulaire);
   });
 });
 
 app.get('/:id', function (request, response) {
-  var idMatcher = /^[a-f\d]{24}$/i;
+  var idMatcher = /^[A-Za-z\d_-]{7,14}$/i;
   if (request.params.id.match(idMatcher)){
-    Formulaire.findById(request.params.id, function(err, formulaire){
+    Formulaire.find({id: request.params.id}, function(err, formulaire){
       if (err){
         return console.log(err);
       }
@@ -92,22 +70,35 @@ app.get('/:id', function (request, response) {
 });
 
 app.post('/:id', function (request, response) {
-  var idMatcher = /^[a-f\d]{24}$/i;
+  var idMatcher = /^[A-Za-z\d_-]{7,14}$/i;
   if (request.params.id.match(idMatcher)){
-    Formulaire.findById(request.params.id, function(err, formulaire){
+    Formulaire.findOne({id: request.params.id}, function(err, formulaire){
       if (err){
         return console.log(err);
       }
       if (!formulaire) {
-        return response.status(404).send('Document not found');
+        var newFormulaire = new Formulaire({
+          id: request.body.id,
+          firstName: request.body.firstName,
+          lastName: request.body.lastName,
+          chiffrages: request.body.chiffrages
+        });
+        return newFormulaire.save(function(err, savedFormulaire){
+          if (err) {
+            response.status(500).send();
+            return console.log(err);
+          }
+          response.send(savedFormulaire);
+        });
       }
+
       formulaire.firstName = request.body.firstName;
       formulaire.lastName = request.body.lastName;
       formulaire.chiffrages = request.body.chiffrages;
 
       formulaire.save(function(err, savedFormulaire){
         if (err) {
-          console.log(err);
+          return console.log(err);
         }
         response.send(savedFormulaire);
       });
@@ -119,9 +110,9 @@ app.post('/:id', function (request, response) {
 });
 
 app.delete('/:id', function(request, response) {
-  var idMatcher = /^[a-f\d]{24}$/i;
+  var idMatcher = /^[A-Za-z\d_-]{7,14}$/i;
   if (request.params.id.match(idMatcher)){
-    Formulaire.remove({_id: request.params.id}, function(err){
+    Formulaire.remove({id: request.params.id}, function(err){
       if (err) {
         return console.log(err);
       }
@@ -133,12 +124,16 @@ app.delete('/:id', function(request, response) {
   }
 });
 
+app.delete('/', function(request, response){
+  mongoose.connection.db.dropDatabase();
+  response.send();
+});
+
 mongoose.connect(mongoUrl);
 var mongoDb = mongoose.connection;
 mongoDb.on('error', console.error.bind(console, 'Can\'t connect to MongoDB.'));
 mongoDb.on('open', function(){
   console.log('Connected to MongoDB, launch service...');
-  initMongo();
   app.listen(port, function () {
     console.log('App listening on port ' + port + '!');
   });
