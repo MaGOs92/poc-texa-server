@@ -3,9 +3,6 @@ var express = require('express'),
   async = require('async'),
   bodyParser = require('body-parser');
 
-// Data
-var dataSample = require('./data');
-
 // Schema
 var Formulaire = require('./formulaire');
 
@@ -94,6 +91,7 @@ app.post('/:id', function (request, response) {
 
       formulaire.firstName = request.body.firstName;
       formulaire.lastName = request.body.lastName;
+      formulaire.modifiedTimestamp = Date.now();
       formulaire.chiffrages = request.body.chiffrages;
 
       formulaire.save(function(err, savedFormulaire){
@@ -112,10 +110,16 @@ app.post('/:id', function (request, response) {
 app.delete('/:id', function(request, response) {
   var idMatcher = /^[A-Za-z\d_-]{7,14}$/i;
   if (request.params.id.match(idMatcher)){
-    Formulaire.remove({id: request.params.id}, function(err){
+    Formulaire.findOne({id: request.params.id}, function(err, formulaire){
       if (err) {
         return console.log(err);
       }
+      formulaire.deleted = true;
+      formulaire.save(function(err){
+        if (err){
+          console.log(err);
+        }
+      });
       return response.send("Document deleted");
     });
   }

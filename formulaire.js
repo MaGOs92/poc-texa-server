@@ -14,6 +14,12 @@ var FormulaireSchema = mongoose.Schema({
     type: String,
     required: true
   },
+  modifiedTimestamp: {
+    type: Number
+  },
+  deleted: {
+    type: Boolean
+  },
   chiffrages: [{
     label: {
       type: String,
