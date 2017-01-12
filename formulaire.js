@@ -14,6 +14,10 @@ var FormulaireSchema = mongoose.Schema({
     type: String,
     required: true
   },
+  email: {
+    type: String,
+    required: true
+  },
   modifiedTimestamp: {
     type: Number
   },
