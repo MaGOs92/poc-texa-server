@@ -93,7 +93,7 @@ app.post('/:id', function (request, response) {
 
       formulaire.firstName = request.body.firstName;
       formulaire.lastName = request.body.lastName;
-      formulaire.email = request.body.lastName;
+      formulaire.email = request.body.email;
       formulaire.modifiedTimestamp = Date.now();
       formulaire.chiffrages = request.body.chiffrages;
 
