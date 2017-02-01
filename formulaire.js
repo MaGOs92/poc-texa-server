@@ -18,6 +18,9 @@ var FormulaireSchema = mongoose.Schema({
     type: String,
     required: true
   },
+  photos: [
+    String
+  ],
   modifiedTimestamp: {
     type: Number
   },

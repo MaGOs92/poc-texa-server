@@ -38,6 +38,7 @@ app.post('/', function(request, response) {
     firstName: request.body.firstName,
     lastName: request.body.lastName,
     email: request.body.email,
+    photos: request.body.photos,
     chiffrages: request.body.chiffrages
   });
   newFormulaire.save(function(err, savedFormulaire){
@@ -80,6 +81,7 @@ app.post('/:id', function (request, response) {
           firstName: request.body.firstName,
           lastName: request.body.lastName,
           email: request.body.email,
+          photos: request.body.photos,
           chiffrages: request.body.chiffrages
         });
         return newFormulaire.save(function(err, savedFormulaire){
@@ -94,6 +96,7 @@ app.post('/:id', function (request, response) {
       formulaire.firstName = request.body.firstName;
       formulaire.lastName = request.body.lastName;
       formulaire.email = request.body.email;
+      formulaire.photos = request.body.photos;
       formulaire.modifiedTimestamp = Date.now();
       formulaire.chiffrages = request.body.chiffrages;
 
