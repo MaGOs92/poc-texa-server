@@ -120,6 +120,9 @@ app.delete('/:id', function(request, response) {
       if (err) {
         return console.log(err);
       }
+      else if (!formulaire){
+        return response.status(400).send('Document does not exist');
+      }
       formulaire.deleted = true;
       formulaire.save(function(err){
         if (err){
